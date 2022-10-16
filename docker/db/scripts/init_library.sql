@@ -1,57 +1,59 @@
 CREATE SCHEMA IF NOT EXISTS library;
 
 CREATE TABLE library.Publisher(
-    publisher_id serial primary key,
-    name text NOT NULL ,
-    address text NOT NULL
+    pubName text primary key,
+    pubAddress text NOT NULL
 );
 
 CREATE TABLE library.Category(
-    title text primary key,
-    parent_title text,
+    categoryName text primary key,
+    parentCat text,
 
-    FOREIGN KEY (parent_title)
-        REFERENCES library.Category(title)
+    FOREIGN KEY (parentCat)
+        REFERENCES library.Category(categoryName)
 );
 
 CREATE TABLE library.Book(
     isbn serial primary key,
     author text,
-    page_count int,
+    pagesNum int,
     title text,
-    year date,
-    publisher_id serial,
+    pubYear date,
+    pubName text,
 
-    FOREIGN KEY (publisher_id)
-        REFERENCES library.Publisher(publisher_id)
+    FOREIGN KEY (pubName)
+        REFERENCES library.Publisher(pubName)
 );
 
 CREATE TABLE library.Book_Category(
-    title text REFERENCES library.Category(title),
+    categoryName text REFERENCES library.Category(categoryName),
     isbn int REFERENCES library.Book(isbn),
-    CONSTRAINT category_book_pkey PRIMARY KEY (title, isbn)
+    CONSTRAINT category_book_pkey PRIMARY KEY (categoryName, isbn)
 );
 
 CREATE TABLE library.Copy(
-    copy_number serial primary key,
-    place int,
-    book_id int,
+    copyNumber serial,
+    isbn int REFERENCES library.Book(isbn),
+    shelfPosition int,
 
-    FOREIGN KEY (book_id)
-        REFERENCES library.Book(isbn)
+   CONSTRAINT copy_book_pkey PRIMARY KEY (copyNumber, isbn)
 );
 
 CREATE TABLE library.Reader(
-    reader_id serial primary key,
-    name text,
-    surname text,
+    number serial primary key,
+    firstName text,
+    lastName text,
     birthday date,
     address text
 );
 
-CREATE TABLE library.Library(
-    copy_number int REFERENCES library.Copy(copy_number),
-    reader_id int REFERENCES library.Reader(reader_id),
-    end_date date,
-    CONSTRAINT copy_reader_pkey PRIMARY KEY (copy_number, reader_id)
+CREATE TABLE library.Borrowing(
+    copyNumber int,
+    isbn int,
+    readerNr int REFERENCES library.Reader(number),
+    returnDate date,
+
+    FOREIGN KEY (copyNumber, isbn)
+        REFERENCES library.Copy (copyNumber, isbn),
+    CONSTRAINT copy_reader_pkey PRIMARY KEY (copyNumber, readerNr, isbn)
 );
